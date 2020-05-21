@@ -39,6 +39,6 @@ esac
 if [ ! -z "$(ls | grep -x mariadb_backup.zip)" ] ; then
   read -p "[info] Do you want to restore the available backup of mariaDB (can take a few minutes)? (y/n)?" choice
   case "$choice" in 
-    y|Y ) rm -Rf "./${INFRA_CONTAINER_PREFIX}mariadb" && unzip "mariadb_backup.zip" -d "./";;
+    y|Y ) rm -Rf "./${INFRA_CONTAINER_PREFIX}mariadb" && unzip "mariadb_backup.zip" -d "./" && docker restart "${INFRA_CONTAINER_PREFIX}mariadb";;
   esac
 fi
