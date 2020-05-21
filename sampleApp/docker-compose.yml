@@ -1,0 +1,23 @@
+version: '2'
+
+networks:
+    default:
+        external:
+            name: "${INFRA_CONTAINER_PREFIX}dev"
+
+services:
+
+    myApp:
+        image: kennethreitz/httpbin
+        container_name: "${APP_CONTAINER_NAME}"
+        environment:
+            VIRTUAL_HOST:   "${COMPOSE_PROJECT_NAME}.mydomain.com"
+            APP_NAME:       "${APP_CONTAINER_NAME}"
+            ENV:            "dev"
+            DATABASE_HOST: "${INFRA_CONTAINER_PREFIX}mariadb"
+            DATABASE_PORT: "3306"
+            DATABASE_NAME: "DB_NAME"
+            DATABASE_USERNAME: "root"
+            DATABASE_PASSWORD: "root"
+        volumes:
+            - "./${COMPOSE_PROJECT_NAME}_app:/src:cached" #":cached" for Mac only

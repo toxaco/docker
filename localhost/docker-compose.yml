@@ -1,0 +1,132 @@
+version: "2"
+
+networks:
+    default:
+        external:
+            name: "${INFRA_CONTAINER_PREFIX}dev"
+
+services:
+    proxy:
+        image: jwilder/nginx-proxy:alpine
+        container_name: "${INFRA_CONTAINER_PREFIX}proxy"
+        privileged: true
+        restart: always
+        ports:
+            - 80:80
+            # - 443:443
+        volumes:
+            - /var/run/docker.sock:/tmp/docker.sock:cached
+            # - "./${INFRA_CONTAINER_PREFIX}proxy/my_proxy.conf:/etc/nginx/conf.d/my_proxy.conf:cached"
+
+    # portainer:
+    #     image: portainer/portainer
+    #     container_name: "${INFRA_CONTAINER_PREFIX}portainer"
+    #     restart: always
+    #     command: --no-analytics
+    #     ports:
+    #         - 9000
+    #     volumes:
+    #         - /var/run/docker.sock:/var/run/docker.sock:cached
+    #         - "./${INFRA_CONTAINER_PREFIX}portainer:/data:cached"
+
+    redis:
+        image: bitnami/redis:4.0
+        container_name: "${INFRA_CONTAINER_PREFIX}redis"
+        environment:
+            REDIS_PASSWORD: locahost123
+        # restart: always
+        ports:
+            - 6379:6379
+        volumes:
+            - "./${INFRA_CONTAINER_PREFIX}redis:/data:cached"
+
+    elasticsearch:
+        image: docker.elastic.co/elasticsearch/elasticsearch:6.8.7
+        container_name: "${INFRA_CONTAINER_PREFIX}elasticsearch"
+        environment:
+            - cluster.name=otm
+            - discovery.type=single-node
+            - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+            # - cluster.initial_master_nodes[0]=localhost
+            # - http.cors.enabled=true
+            # - http.cors.allow-credentials=true
+            # - http.cors.allow-headers=X-Requested-With,X-Auth-Token,Content-Type,Content-Length,Authorization
+            # - http.cors.allow-origin=/https?:\/\/localhost(:[0-9]+)?/
+        ports:
+            - 9200:9200
+            - 9300:9200
+
+    mariadb:
+        image: mariadb
+        container_name: "${INFRA_CONTAINER_PREFIX}mariadb"
+        restart: always
+        ports:
+            - 3306:3306
+        volumes:
+            - "./${INFRA_CONTAINER_PREFIX}mariadb:/var/lib/mysql:cached" #for Mac
+            - "./${INFRA_CONTAINER_PREFIX}mysqlConfig:/etc/mysql/conf.d/:cached" #for Mac # Ensure MySql 5.7 is running in "disable strict SQL mod". [03/2018]
+        environment:
+            MYSQL_ROOT_PASSWORD: root
+    # mysql:
+    #     image: mysql:5.7
+    #     container_name: "${INFRA_CONTAINER_PREFIX}mysql"
+    #     restart: always
+    #     ports:
+    #         - 3306:3306
+    #     volumes:
+    #         - "./${INFRA_CONTAINER_PREFIX}data/mysql:/var/lib/mysql:cached"
+    #         # Ensure MySql 5.7 is running in "disable strict SQL mod". [03/2018]
+    #         - "./${INFRA_CONTAINER_PREFIX}config/mysqlConfig/:/etc/mysql/conf.d/:cached"
+    #     environment:
+    #         MYSQL_ROOT_PASSWORD: root
+    # blackfire:
+    #     image: blackfire/blackfire
+    #     container_name: "${INFRA_CONTAINER_PREFIX}blackfire"
+    #     restart: always
+    #     ports:
+    #         - 8707:8707
+    #     environment:
+    #         BLACKFIRE_CLIENT_ID: "47aba20d-ba22-4160-b16a-e87f8bb55d38"
+    #         BLACKFIRE_CLIENT_TOKEN: "c5b80eebaab1ad94c85368d0955a653ebb8d60469fa868db6aaafdc0b2e0493e"
+    #         BLACKFIRE_SERVER_ID: "26ee3109-d139-4bc6-bccd-68276b85596e"
+    #         BLACKFIRE_SERVER_TOKEN: "ed714c208eae8d61075e432b02f86bb29d518f5c7813c277f29e2d694ca4a0d3"
+    # prometheus:
+    #     image: prom/prometheus
+    #     restart: always
+    #     container_name: "${INFRA_CONTAINER_PREFIX}prometheus"
+    #     ports:
+    #         - 9901:9901
+    #     volumes:
+    #         - "./${INFRA_CONTAINER_PREFIX}config/prometheus.yml:/etc/prometheus/prometheus.yml:cached"
+    # mongo:
+    #     image: mongo
+    #     container_name: "${INFRA_CONTAINER_PREFIX}mongo"
+    #     # restart: always
+    #     volumes:
+    #         - "./${INFRA_CONTAINER_PREFIX}data/mongo/:/data/:cached"
+    #         - "./${INFRA_CONTAINER_PREFIX}data/mongoSeed/:/tmp/mongoSeed/:cached"
+    #     # environment:
+    #     #    MONGO_INITDB_ROOT_USERNAME: root
+    #     #    MONGO_INITDB_ROOT_PASSWORD: root
+    #    mongo-express:
+    #        image: mongo-express
+    #        container_name: ${INFRA_CONTAINER_PREFIX}mongo-express
+    #        restart: always
+    #        ports:
+    #            - 8081:8081
+    #        volumes:
+    #            - "./${INFRA_CONTAINER_PREFIX}data/mongoExpress:/data/conf:cached"
+    # #       environment:
+    # #            ME_CONFIG_MONGODB_ADMINUSERNAME: root
+    # #            ME_CONFIG_MONGODB_ADMINPASSWORD: root
+    #    mongoclient:
+    #        image: mongoclient/mongoclient
+    #        container_name: "${INFRA_CONTAINER_PREFIX}mongoclient"
+    #        restart: always
+    #        ports:
+    #            - 3000:3000
+    #        volumes:
+    #            - "./${INFRA_CONTAINER_PREFIX}data/mongoClient:/data/db:cached"
+    # #       environment:
+    # #            ME_CONFIG_MONGODB_ADMINUSERNAME: root
+    # #            ME_CONFIG_MONGODB_ADMINPASSWORD: root
